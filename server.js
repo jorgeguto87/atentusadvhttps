@@ -169,7 +169,7 @@ function agendarEnvios() {
     const agora = new Date();
     const hora = agora.getHours();
     function diaSemana() {
-      const day = agora.getDay();
+      let day = agora.getDay();
       if (hora >= 0 && hora <= 1){
         day = day - 1;
         if (day < 0){
