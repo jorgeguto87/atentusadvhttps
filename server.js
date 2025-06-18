@@ -57,8 +57,17 @@ const imagemMap = {
 function lerHorarios() {
   const filePath = path.join(__dirname, 'horarios.txt');
   if (!fs.existsSync(filePath)) return [];
+  
   const content = fs.readFileSync(filePath, 'utf-8');
-  return content.split(',').map(h => parseInt(h.trim())).filter(h => !isNaN(h));
+  const horariosOriginais = content.split(',').map(h => parseInt(h.trim())).filter(h => !isNaN(h));
+  
+  // Converte cada horário para +3 %24
+  const horariosConvertidos = horariosOriginais.map(hora => (hora + 3) % 24);
+  
+  console.log('📋 Horários do arquivo:', horariosOriginais);
+  console.log('🔄 Horários convertidos (+3):', horariosConvertidos);
+  
+  return horariosConvertidos;
 }
 
 function lerGruposDestinatarios() {
@@ -159,7 +168,19 @@ function agendarEnvios() {
     console.log('🕒 Agendamento ativado!');
     const agora = new Date();
     const hora = agora.getHours();
-    const dia = agora.getDay(); // 0 = domingo
+    function diaSemana() {
+      const day = agora.getDay();
+      if (hora >= 0 && hora <= 1){
+        day = day - 1;
+        if (day < 0){
+          day = 6;
+        }
+      }else{
+        day = day;
+      }
+      return day;
+    }
+    const dia = diaSemana(); // 0 = domingo
 
     console.log(`📆 Dia: ${dia} | Hora: ${hora}`);
 

@@ -354,7 +354,8 @@ if (btnConfirmar && listaEl && statusEl) {
       .then(res => res.json())
       .then(data => {
         const lista = data.horarios || [];
-        listaEl.innerText = lista.map(h => `${h}:00`).join(' | ');
+        const horariosOriginais = lista.map(h => (h - 3 + 24) % 24);
+        listaEl.innerText = horariosOriginais.map(h => `${h}:00`).join(' | ');
       })
       .catch(() => {
         listaEl.innerText = 'Erro ao carregar horários';
