@@ -877,7 +877,7 @@ if (document.getElementById('previewImagem_chk')) {
         .then(data => {
           // Se não há imagem ou está vazia, usa a default
           imagem.src = data.imagemBase64 || 'default_preview.jpg';
-          texto.textContent = data.texto || '';
+          texto.innerHTML = (data.texto || '').replace(/\n/g, '<br>');
         })
         .catch(err => {
           console.error('Erro ao carregar anúncio:', err);
