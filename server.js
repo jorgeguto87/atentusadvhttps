@@ -96,35 +96,64 @@ function lerMensagensDataTxt() {
 }
 
 async function startClient() {
-  client = new Client({
-    authStrategy: new LocalAuth({ clientId: 'atentusadv' }),
-    puppeteer: {
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+  try {
+    client = new Client({
+      authStrategy: new LocalAuth({ clientId: 'atentusadv' }),
+      puppeteer: {
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu',
+          '--no-zygote',
+          '--single-process',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding',
+          '--no-first-run',
+          '--disable-features=site-per-process',
+          '--keep-alive-for-test'
+        ]
+      }
+    });
+
+    client.on('qr', async qr => {
+      qrBase64 = await qrcode.toDataURL(qr);
+      isConnected = false;
+      console.log('📲 Novo QR Code gerado.');
+    });
+
+    client.on('ready', () => {
+      isConnected = true;
+      console.log('✅ Chatbot conectado com sucesso!');
+      escutarGrupos();
+      agendarEnvios();
+    });
+
+    client.on('disconnected', async () => {
+      console.log('❌ Cliente desconectado. Tentando reiniciar...');
+      isConnected = false;
+      await restartClient();
+    });
+
+    await client.initialize();
+
+  } catch (error) {
+    console.error('❗ Erro ao iniciar o cliente:', error.message);
+    if (
+      error.message.includes('net::ERR_NETWORK_CHANGED') ||
+      error.message.includes('Execution context was destroyed')
+    ) {
+      console.log('🌐 Problema de rede detectado. Tentando reiniciar em 5 segundos...');
+      setTimeout(() => startClient(), 5000);
+    } else {
+      console.log('Erro inesperado. Tentando reiniciar em 10 segundos...');
+      setTimeout(() => startClient(), 10000);
     }
-  });
-
-  client.on('qr', async qr => {
-    qrBase64 = await qrcode.toDataURL(qr);
-    isConnected = false;
-    console.log('📲 Novo QR Code gerado.');
-  });
-
-  client.on('ready', () => {
-    isConnected = true;
-    console.log('✅ Chatbot conectado com sucesso!');
-    escutarGrupos();
-    agendarEnvios();
-  });
-
-  client.on('disconnected', () => {
-    isConnected = false;
-    console.log('❌ Cliente desconectado.');
-  });
-
-  await client.initialize();
+  }
 }
 
-startClient();
 
 
 
