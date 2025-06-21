@@ -250,6 +250,7 @@ function agendarEnvios() {
       for (const grupoId of grupos) {
         try {
           await client.sendMessage(grupoId, media, { caption: texto });
+          await new Promise(resolve => setTimeout(resolve, 2000));
           console.log(`✅ Mensagem enviada para ${grupoId} (${nomeMensagem})`);
         } catch (erroEnvio) {
           console.error(`❌ Erro ao enviar para ${grupoId}:`, erroEnvio.message);
