@@ -96,12 +96,33 @@ function lerMensagensDataTxt() {
 }
 
 async function startClient() {
-  client = new Client({
-    authStrategy: new LocalAuth({ clientId: 'atentusadv' }),
-    puppeteer: {
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    }
-  });
+client = new Client({
+  authStrategy: new LocalAuth({ clientId: 'atentusadv' }),
+  puppeteer: {
+    headless: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--disable-gpu',
+      '--no-zygote',
+      '--single-process',
+      '--disable-background-networking',
+      '--disable-background-timer-throttling',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-client-side-phishing-detection',
+      '--disable-default-apps',
+      '--disable-extensions',
+      '--disable-sync',
+      '--metrics-recording-only',
+      '--mute-audio',
+      '--no-first-run',
+      '--safebrowsing-disable-auto-update'
+    ]
+  }
+});
+
 
   client.on('qr', async qr => {
     qrBase64 = await qrcode.toDataURL(qr);
@@ -250,8 +271,8 @@ function agendarEnvios() {
       for (const grupoId of grupos) {
         try {
           await client.sendMessage(grupoId, media, { caption: texto });
-          await new Promise(resolve => setTimeout(resolve, 2000));
           console.log(`✅ Mensagem enviada para ${grupoId} (${nomeMensagem})`);
+          await new Promise(resolve => setTimeout(resolve, 2000));
         } catch (erroEnvio) {
           console.error(`❌ Erro ao enviar para ${grupoId}:`, erroEnvio.message);
         }
@@ -748,7 +769,7 @@ app.get('/usuarios', async (req, res) => {
 
 
 //teste
-/*app.get('/testar-envio-agora', async (req, res) => {
+app.get('/testar-envio-agora', async (req, res) => {
   const dia = new Date().getDay(); // dia atual
   const hora = new Date().getHours(); // hora atual
   const nomeImagemBase = imagemMap[dia];
@@ -790,7 +811,7 @@ app.get('/usuarios', async (req, res) => {
     res.send('❌ Erro ao enviar mensagem de teste');
   }
 });
-*/
+
 
 const httpsServer = https.createServer(credentials, app);
 httpsServer.listen(PORT, () => {
