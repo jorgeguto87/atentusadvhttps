@@ -58,16 +58,16 @@ const imagemMap = {
 function lerHorarios() {
   const filePath = path.join(__dirname, 'horarios.txt');
   if (!fs.existsSync(filePath)) return [];
-  
+
   const content = fs.readFileSync(filePath, 'utf-8');
   const horariosOriginais = content.split(',').map(h => parseInt(h.trim())).filter(h => !isNaN(h));
-  
+
   // Converte cada horário para +3 %24
   const horariosConvertidos = horariosOriginais.map(hora => (hora + 3) % 24);
-  
+
   console.log('📋 Horários do arquivo:', horariosOriginais);
   console.log('🔄 Horários convertidos (+3):', horariosConvertidos);
-  
+
   return horariosConvertidos;
 }
 
@@ -181,7 +181,6 @@ function escutarGrupos() {
     }
   });
 }
-
 function agendarEnvios() {
   console.log('📅 Função de agendamento registrada');
   let enviadosHoje = new Set();
@@ -228,7 +227,7 @@ function agendarEnvios() {
     const nomeImagemBase = imagemMap[dia];
     const nomeMensagem = diaMap[dia];
 
-    if (!nomeImagemBase || !nomeMensagem) {
+        if (!nomeImagemBase || !nomeMensagem) {
       console.log('⚠️ Dia não mapeado corretamente:', dia);
       return;
     }
@@ -253,9 +252,9 @@ function agendarEnvios() {
     }
 
     if (!caminhoImagem) {
-      console.log(`🖼️ Imagem não encontrada para ${nomeImagemBase}`);
+      console.log(`🖼️ Imagem não encontrada para ${nomeImagemBase}` );
     } else {
-      console.log(`🖼️ Imagem encontrada: ${caminhoImagem}`);
+      console.log(`🖼️ Imagem encontrada: ${caminhoImagem}` );
     }
 
     if (!caminhoImagem || !texto) {
@@ -271,8 +270,8 @@ function agendarEnvios() {
       for (const grupoId of grupos) {
         try {
           await client.sendMessage(grupoId, media, { caption: texto });
-          console.log(`✅ Mensagem enviada para ${grupoId} (${nomeMensagem})`);
           await new Promise(resolve => setTimeout(resolve, 2000));
+          console.log(`✅ Mensagem enviada para ${grupoId} (${nomeMensagem})`);
         } catch (erroEnvio) {
           console.error(`❌ Erro ao enviar para ${grupoId}:`, erroEnvio.message);
         }
@@ -769,7 +768,7 @@ app.get('/usuarios', async (req, res) => {
 
 
 //teste
-app.get('/testar-envio-agora', async (req, res) => {
+/*app.get('/testar-envio-agora', async (req, res) => {
   const dia = new Date().getDay(); // dia atual
   const hora = new Date().getHours(); // hora atual
   const nomeImagemBase = imagemMap[dia];
@@ -811,7 +810,7 @@ app.get('/testar-envio-agora', async (req, res) => {
     res.send('❌ Erro ao enviar mensagem de teste');
   }
 });
-
+*/
 
 const httpsServer = https.createServer(credentials, app);
 httpsServer.listen(PORT, () => {
