@@ -139,48 +139,86 @@ function atualizarInterfaceLogin() {
   }
 }
 
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atentus Advertisements Zap</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/png" href="assets_page/favicon.png">
-</head>
-<body class="corpo__principal">
-  <header class="cabecalho">
-    <img src="assets_page/logo.png" alt="Logo" class="cabecalho__logo">
-    <h1 class="cabecalho__titulo">Atentus Advertisements Zap</h1>
-    <div>
-    <div class="menu" id="menu_bar">
-      <a href="#" class="nav-link" data-page="anuncios">Criar Anúncios</a>
-      <a href="#" class="nav-link" data-page="meusanuncios">Meus Anúncios</a>
-      <a href="#" class="nav-link" data-page="grupos">Grupos</a>
-      <a href="#" class="nav-link" data-page="horarios">Horários</a>
-      <a href="#" class="nav-link" data-page="conexao">Conexão</a>
-    </div>
-  </header>
-
-  <main></main> <!-- Dinâmico -->
-
-  <footer class="rodape">
-    <p class="texto__rodape">Desenvolvido por Atentus Cloud</p>
-    <div class="rodape__icones">
-        <a href="https://wa.me/5521974459696?text=Ol%C3%A1%2C%20gostaria%20de%20saber%20mais%20sobre%20as%20solu%C3%A7%C3%B5es." target="_blank" rel="noopener noreferrer">
-        <img src="assets_page/icon_zap.png" alt="Whatsapp" class="rodape__icones__icone">
-        </a>
-        <a href="https://instagram.com/atentus.cloud" target="_blank" rel="noopener noreferrer">
-        <img src="assets_page/icon_insta.png" alt="Instagram" class="rodape__icones__icone">
-        </a>
-        <a href="https://www.facebook.com/share/1FVDioBx9h/" target="_blank" rel="noopener noreferrer">
-        <img src="assets_page/icon_face.png" alt="Facebook" class="rodape__icones__icone">
-        </a>
-    </div>
-</footer>
-
-  <script src="app.js"></script>
-</body>
-</html>
+function carregarPagina(pagina) {
+  // Verificar se a página requer autenticação
+  if (!paginasPublicas.includes(pagina) && !verificarAutenticacao()) {
+    alert('Você precisa fazer login para acessar esta página!');
+    carregarPagina('login');
+    return;
+  }
+  
+  // Debug: verificar se o arquivo existe
+  console.log(`Tentando carregar: pages/${pagina}.html`);
+  
+  fetch(`https://atentus.com.br:3040/pages/${pagina}.html`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`Arquivo não encontrado: pages/${pagina}.html (${response.status})`);
+      }
+      return response.text();
+    })
+    .then(html => {
+      const main = document.querySelector('main') || document.getElementById('main');
+      if (main) {
+        main.innerHTML = html;
+      }
+      
+      // Atualizar navegação ativa
+      const activeLinks = document.querySelectorAll('.nav-link.active');
+      activeLinks.forEach(link => link.classList.remove('active'));
+      
+      const currentLink = document.querySelector(`[data-page="${pagina}"]`);
+      if (currentLink) {
+        currentLink.classList.add('active');
+      }
+      
+      // Inicializar funcionalidades específicas da página
+      if (pagina === 'login') {
+        inicializarLogin();
+      } else if (pagina === 'cadastro') {
+        botaoLogin();
+        inicializarElementosPagina();
+        inicializarCadastro();
+      } else {
+        inicializarElementosPagina();
+      }
+      
+      // Atualizar interface baseada no login
+      atualizarInterfaceLogin();
+      
+      console.log(`Página ${pagina} carregada com sucesso`);
+    })
+    .catch((error) => {
+      console.error('Erro detalhado:', error);
+      const main = document.querySelector('main') || document.getElementById('main');
+      if (main) {
+        if (pagina === 'anuncios') {
+          const nomeUsuario = sessionStorage.getItem('loginUsuario') || 'Usuário';
+          main.innerHTML = `
+            <div style="text-align: center; padding: 2rem;">
+              <h2>Bem-vindo, ${nomeUsuario}!</h2>
+              <p>Login realizado com sucesso.</p>
+              <p><small>Arquivo pages/anuncios.html não encontrado.</small></p>
+              <button onclick="realizarLogout()" style="background: #dc3545; color: white; border: none; border-radius: 4px;">
+                Fazer Logout
+              </button>
+            </div>
+          `;
+        } else {
+          main.innerHTML = `
+            <div style="text-align: center; padding: 2rem;">
+              <h2>Erro ao carregar página</h2>
+              <p>Não foi possível carregar: <strong>${pagina}.html</strong></p>
+              <p><small>${error.message}</small></p>
+              <button onclick="carregarPagina('login')">
+                Voltar ao Login
+              </button>
+            </div>
+          `;
+        }
+      }
+    });
+}
 
 // Função para inicializar o cadastro
 function inicializarCadastro() {
@@ -839,7 +877,7 @@ if (document.getElementById('previewImagem_chk')) {
         .then(data => {
           // Se não há imagem ou está vazia, usa a default
           imagem.src = data.imagemBase64 || 'default_preview.jpg';
-          texto.innerHTML = (data.texto || '').replace(/\n/g, '<br>');
+          texto.innerHTML = (data.texto || '').replace(/\n/g,'<br>');
         })
         .catch(err => {
           console.error('Erro ao carregar anúncio:', err);
@@ -974,7 +1012,7 @@ if (document.getElementById('btn-apagar-todos')){
 
 
   // if (main.innerHTML.includes("id_exclusivo_da_nova_pagina")) { ... }
-}</br>
+}
 
 // Configura os links do menu
 function getCurrentPage() {
