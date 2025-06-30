@@ -443,7 +443,7 @@ app.get('/anuncio/:dia', (req, res) => {
   const nomeImagem = nomesDias[dia];
   if (!nomeImagem) return res.status(400).json({ error: 'Dia inválido' });
 
-  const exts = ['jpg', 'png'];
+  const exts = ['jpg', 'png', 'mp4', 'gif'];
   let imagemPath = null;
   for (const ext of exts) {
     const caminho = path.join(__dirname, 'assets', `${nomeImagem}.${ext}`);
