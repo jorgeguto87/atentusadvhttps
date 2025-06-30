@@ -455,17 +455,34 @@ function inicializarElementosPagina() {
   }
 
   const fileInput = document.getElementById('file-input');
-  const imagem = document.getElementById('previewImagem');
-  if (fileInput && imagem) {
-    fileInput.addEventListener('change', () => {
-      const file = fileInput.files[0];
-      if (file) {
+const previewContainer = document.getElementById('previewContainer');
+if (fileInput && previewContainer) {
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (file) {
+      // Limpa preview anterior
+      previewContainer.innerHTML = '';
+      
+      if (file.type.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.className = 'main__preview__imagem';
         const reader = new FileReader();
-        reader.onload = () => imagem.src = reader.result;
+        reader.onload = () => img.src = reader.result;
         reader.readAsDataURL(file);
+        previewContainer.appendChild(img);
+      } 
+      else if (file.type.startsWith('video/')) {
+        const video = document.createElement('video');
+        video.className = 'main__preview__imagem';
+        video.controls = true;
+        const reader = new FileReader();
+        reader.onload = () => video.src = reader.result;
+        reader.readAsDataURL(file);
+        previewContainer.appendChild(video);
       }
-    });
-  }
+    }
+  });
+}
 
   const campoMensagem = document.getElementById('input_text');
   const uploadText = document.getElementById('upload_text');
@@ -508,7 +525,7 @@ function inicializarElementosPagina() {
     diaSemanaSelect.addEventListener('change', () => {
       const statusDocs = document.getElementById('status_documents');
       const statusText = document.getElementById('status_text');
-      const previewImagem = document.getElementById('previewImagem');
+      const previewImagem = document.getElementById('previewContainer');
       const inputText = document.getElementById('input_text');
       const previewText = document.getElementById('previewText');
 
@@ -864,25 +881,60 @@ if (document.getElementById('tabela_grupos_check')) {
       console.error('Erro ao carregar os grupos:', error);
     });
 }
-if (document.getElementById('previewImagem_chk')) {
+if (document.getElementById('previewContainer_chk')) {
   const selectDia = document.getElementById('diaSemana_chk');
-  const imagem = document.getElementById('previewImagem_chk');
+  const previewContainer = document.getElementById('previewContainer_chk');
   const texto = document.getElementById('previewText_chk');
 
-  if (selectDia && imagem && texto) {
+  if (selectDia && previewContainer && texto) {
     // Função para carregar prévia
     const carregarPreview = (dia) => {
       fetch(`https://atentus.com.br:3040/anuncio/${dia}`)
         .then(res => res.json())
         .then(data => {
-          // Se não há imagem ou está vazia, usa a default
-          imagem.src = data.imagemBase64 || 'default_preview.jpg';
+          // Limpa preview anterior
+          previewContainer.innerHTML = '';
+          
+          if (data.imagemBase64) {
+            // Detecta se é imagem ou vídeo pelo início do base64
+            if (data.imagemBase64.startsWith('data:image/')) {
+              const img = document.createElement('img');
+              img.className = 'main__preview__imagem';
+              img.src = data.imagemBase64;
+              previewContainer.appendChild(img);
+            } 
+            else if (data.imagemBase64.startsWith('data:video/')) {
+              const video = document.createElement('video');
+              video.className = 'main__preview__imagem';
+              video.controls = true;
+              video.src = data.imagemBase64;
+              previewContainer.appendChild(video);
+            }
+            else {
+              // Fallback para imagem se não conseguir detectar
+              const img = document.createElement('img');
+              img.className = 'main__preview__imagem';
+              img.src = data.imagemBase64 || 'default_preview.jpg';
+              previewContainer.appendChild(img);
+            }
+          } else {
+            // Se não há arquivo, usa imagem default
+            const img = document.createElement('img');
+            img.className = 'main__preview__imagem';
+            img.src = 'default_preview.jpg';
+            previewContainer.appendChild(img);
+          }
+          
           texto.innerHTML = (data.texto || '').replace(/\n/g,'<br>');
         })
         .catch(err => {
           console.error('Erro ao carregar anúncio:', err);
-          // Em caso de erro, também usa a imagem default
-          imagem.src = 'default_preview.jpg';
+          // Em caso de erro, usa imagem default
+          previewContainer.innerHTML = '';
+          const img = document.createElement('img');
+          img.className = 'main__preview__imagem';
+          img.src = 'default_preview.jpg';
+          previewContainer.appendChild(img);
           texto.textContent = '';
         });
     };
@@ -896,7 +948,6 @@ if (document.getElementById('previewImagem_chk')) {
     });
   }
 }
-
 //duplicar anuncios meusanuncios
 
 //document.addEventListener('DOMContentLoaded', () => {
